@@ -820,6 +820,11 @@ a:hover {
   font-size: 1.2rem;
 }
 
+.masonry{
+  column-count: 3;
+  column-gap: 10px;
+}
+
 /*======================================
 //--//-->   TESTIMONIALS
 ======================================*/
