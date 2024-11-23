@@ -1,48 +1,45 @@
 <?php
-
-// Replace this with your own email address
+// Adresse email où vous voulez recevoir les messages
 $to = 'manuegn145@gmail.com';
 
-function url(){
-  return sprintf(
-    "%s://%s",
-    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
-    $_SERVER['SERVER_NAME']
-  );
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupérer et valider les données du formulaire
+    $name = htmlspecialchars(trim($_POST['name'] ?? ''));
+    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
+    $message = htmlspecialchars(trim($_POST['message'] ?? ''));
+
+    // Vérification des champs requis
+    if (!$name || !$email || !$message) {
+        echo "Tous les champs sont requis.";
+        exit;
+    }
+
+    // Format du message
+    $emailMessage = "
+        <html>
+        <head>
+            <title>Mail from contact form</title>
+        </head>
+        <body>
+            <p><strong>Nom :</strong> $name</p>
+            <p><strong>Email :</strong> $email</p>
+            <p><strong>Message :</strong></p>
+            <p>" . nl2br($message) . "</p>
+        </body>
+        </html>
+    ";
+
+    // Headers pour l'email
+    $headers = "From: $name <$email>\r\n";
+    $headers .= "Reply-To: $email\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+
+    // Envoi de l'email
+    if (mail($to, $emailMessage, $headers)) {
+        echo "Votre message a été envoyé avec succès.";
+    } else {
+        echo "Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer.";
+    }
 }
-
-if($_POST) {
-
-   $name = trim(stripslashes($_POST['name']));
-   $email = trim(stripslashes($_POST['email']));
-   $subject = trim(stripslashes($_POST['subject']));
-   $contact_message = trim(stripslashes($_POST['message']));
-
-   
-	if ($subject == '') { $subject = "Contact Form Submission"; }
-
-   // Set Message
-   $message .= "Email from: " . $name . "<br />";
-	 $message .= "Email address: " . $email . "<br />";
-   $message .= "Message: <br />";
-   $message .= nl2br($contact_message);
-   $message .= "<br /> ----- <br /> This email was sent from your site " . url() . " contact form. <br />";
-
-   // Set From: header
-   $from =  $name . " <" . $email . ">";
-
-   // Email Headers
-	$headers = "From: " . $from . "\r\n";
-	$headers .= "Reply-To: ". $email . "\r\n";
- 	$headers .= "MIME-Version: 1.0\r\n";
-	$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-
-   ini_set("sendmail_from", $to); // for windows server
-   $mail = mail($to, $subject, $message, $headers);
-
-	if ($mail) { echo "OK"; }
-   else { echo "Something went wrong. Please try again."; }
-
-}
-
 ?>
